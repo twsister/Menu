@@ -2,18 +2,10 @@ import os
 import subprocess
 import re
 
-root = 'dfl'
-
-ENV = [
-    ("%WORKSPACE%", "workspace"),
-    ("%PYTHON_EXECUTABLE%", "python3"),
-    ("%DFL_ROOT%", "dfl/_internal/DeepFaceLab")
-]
-
 error_code = 0
 
 
-def process(contents):
+def process(ENV, contents):
     for t in ENV:
         contents = contents.replace(t[0], t[1]).replace("\\", "/")
 

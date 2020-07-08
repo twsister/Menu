@@ -1,11 +1,23 @@
+import sys
 import subprocess
-import BatchExecutor
 import os
 import natsort
 import curses
-import sys
 import datetime
-from BatchLogger import log, append
+from pathlib import Path
+from BatchExecutor import process
+from BatchLogger import log
+
+dfl_root = Path(sys.argv[0]).absolute().parent.parent.parent
+sys.path.append(dfl_root.joinpath("_internal/DeepFaceLab"))
+
+print(dfl_root)
+
+ENV = [
+    ("%WORKSPACE%", "workspace"),
+    ("%PYTHON_EXECUTABLE%", "python3"),
+    ("%DFL_ROOT%", dfl_root.joinpath("_internal/DeepFaceLab"))
+]
 
 
 class Screen:
@@ -29,9 +41,10 @@ class Screen:
 
 def _get_sum():
     s = []
-    for file in os.listdir("workspace/model"):
+    model_dir = dfl_root.joinpath("workspace/model")
+    for file in os.listdir(model_dir):
         if file.endswith("_summary.txt"):
-            with open("workspace/model/" + file) as f:
+            with open(model_dir + file) as f:
                 s.append(f.read())
     return s
 
@@ -42,11 +55,10 @@ if __name__ == "__main__":
     except FileNotFoundError:
         gpus = 0
 
-    sys.path.append("dfl/_internal/DeepFaceLab")
+    sys.path.append(dfl_root.joinpath("_internal/DeepFaceLab"))
     bats = []
-    for filename in os.listdir(BatchExecutor.root):
-        path = BatchExecutor.root + "/" + filename
-        if path.endswith(".bat"):
+    for filename in os.listdir(dfl_root):
+        if filename.endswith(".bat"):
             bats.append(filename[:-4])
 
     all_bats = natsort.natsorted(bats)
@@ -73,11 +85,11 @@ if __name__ == "__main__":
                     break
                 elif code == 27:
                     exit(0)
-                elif code == curses.KEY_DOWN and selected < len(bats)-1:
+                elif code == curses.KEY_DOWN and selected < len(bats) - 1:
                     selected += 1
                 elif code == curses.KEY_UP and selected > 0:
                     selected -= 1
-                elif key.lower() in "abcdefghijklmnopqrstuvwxyz.-()_ 1234567890" and len(search) < dims[1]-1:
+                elif key.lower() in "abcdefghijklmnopqrstuvwxyz.-()_ 1234567890" and len(search) < dims[1] - 1:
                     search += key
                     selected = 0
                 elif key == "^?" or key == "KEY_BACKSPACE":
@@ -93,19 +105,22 @@ if __name__ == "__main__":
                             style = curses.A_STANDOUT
                         else:
                             style = curses.A_NORMAL
-                        stdscr.addstr(value, 0, bats[x].ljust(dims[1]-1), style)
+                        stdscr.addstr(value, 0, bats[x].ljust(dims[1] - 1), style)
                 stdscr.addstr(dims[0] - 1, dims[1] - 1 - len(search), search, curses.A_BOLD)
                 code = stdscr.getch()
-        with open(BatchExecutor.root + "/" + bats[selected] + '.bat') as the_file:
+        with open(str(dfl_root.joinpath(bats[selected])) + '.bat') as the_file:
             print("\n\nRunning selection:", bats[selected], '\n')
             log("Running: " + str(bats[selected]))
             sums = _get_sum()
             start = datetime.datetime.now()
-            BatchExecutor.process(the_file.read().strip())
+            try:
+                BatchExecutor.process(ENV, the_file.read().strip())
+            except KeyboardInterrupt:
+                log("KeyboardInterrupt")
             end = datetime.datetime.now()
             new_sums = _get_sum()
             for entry in new_sums:
                 if entry not in sums:
                     append(entry)
-            delta = end-start
+            delta = end - start
             log("Finished after {} GPU hours ({})".format(delta * gpus, delta))
