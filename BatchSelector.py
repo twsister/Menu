@@ -5,18 +5,17 @@ import natsort
 import curses
 import datetime
 from pathlib import Path
-from BatchExecutor import process
+import BatchExecutor
 from BatchLogger import log
 
 dfl_root = Path(sys.argv[0]).absolute().parent.parent.parent
 sys.path.append(dfl_root.joinpath("_internal/DeepFaceLab"))
 
-print(dfl_root)
 
 ENV = [
     ("%WORKSPACE%", "workspace"),
     ("%PYTHON_EXECUTABLE%", "python3"),
-    ("%DFL_ROOT%", dfl_root.joinpath("_internal/DeepFaceLab"))
+    ("%DFL_ROOT%", str(dfl_root.joinpath("_internal/DeepFaceLab")))
 ]
 
 

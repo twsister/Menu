@@ -22,6 +22,7 @@ def process(ENV, contents):
             _translate(section.strip())
             continue
         lines = section.split('\n')
+        # print(lines)
         for line in lines:
             _translate(line.strip())
 
@@ -106,6 +107,7 @@ funcs = {
 
 def _translate(line):
     global buffer
+    # print('---'+line)
     words = line.split(" ")
     if words[0] not in funcs:
         print(words[0], "is not a valid command")
