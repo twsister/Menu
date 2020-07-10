@@ -49,7 +49,7 @@ def get_bats():
     # sort to get 10 after 9
     return natsort.natsorted(result_bats)
 
-
+# takes keyboard input and returns the file selected and search string
 def decode_keys(code, selected, search, len_all_bats):
     key = curses.keyname(code).decode()
     if code == 10 or code == 343:
