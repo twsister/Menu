@@ -4,22 +4,26 @@ import os
 import natsort
 import curses
 import datetime
-from pathlib import Path
 import BatchExecutor
+from pathlib import Path
 from BatchLogger import log
 
+# set dfl_root to location of .bat files
+# this assumes that dfl_menu.py lives in <dfl_root>/_internal/Menu/
 dfl_root = Path(sys.argv[0]).absolute().parent.parent.parent
 sys.path.append(dfl_root.joinpath("_internal/DeepFaceLab"))
 
-
+# these map to the variables inside the .bat files
 ENV = [
-    ("%WORKSPACE%", "workspace"),
+    ("%WORKSPACE%", str(dfl_root.joinpath("workspace"))),
     ("%PYTHON_EXECUTABLE%", "python3"),
     ("%DFL_ROOT%", str(dfl_root.joinpath("_internal/DeepFaceLab")))
 ]
 
 
+# simple screen to display the menu
 class Screen:
+
     def __init__(self):
         self.stdscr = curses.initscr()
         curses.cbreak()
@@ -48,21 +52,30 @@ def _get_sum():
     return s
 
 
-if __name__ == "__main__":
+# count the number of NVIDIA GPUs found
+def get_gpus():
     try:
-        gpus = subprocess.check_output(["nvidia-smi", "-L"]).decode().count("\n")
+        return subprocess.check_output(["nvidia-smi", "-L"]).decode().count("\n")
     except FileNotFoundError:
-        gpus = 0
+        return 0
 
-    sys.path.append(dfl_root.joinpath("_internal/DeepFaceLab"))
-    bats = []
+
+# create a list of .bat files
+def get_bats():
+    result_bats = []
     for filename in os.listdir(dfl_root):
         if filename.endswith(".bat"):
-            bats.append(filename[:-4])
+            result_bats.append(filename[:-4])
+    # sort to get 10 after 9
+    return natsort.natsorted(result_bats)
 
-    all_bats = natsort.natsorted(bats)
 
-    bats = all_bats.copy()
+
+
+if __name__ == "__main__":
+
+    gpus = get_gpus()
+    all_bats = get_bats()
 
     selected = 0
 
@@ -77,6 +90,7 @@ if __name__ == "__main__":
             centerX = int(dims[1] / 2)
             centerY = int(dims[0] / 2)
 
+            bats = all_bats.copy()
             code = -0
             while True:
                 key = curses.keyname(code).decode()
