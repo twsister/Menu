@@ -20,6 +20,7 @@ ENV = [
     ("%DFL_ROOT%", str(dfl_root.joinpath("_internal/DeepFaceLab")))
 ]
 
+
 # simple screen to display the menu
 class Screen:
 
@@ -40,6 +41,7 @@ class Screen:
         curses.echo()
         curses.endwin()
 
+
 # create a list of .bat files
 def get_bats():
     result_bats = []
@@ -48,6 +50,7 @@ def get_bats():
             result_bats.append(filename[:-4])
     # sort to get 10 after 9
     return natsort.natsorted(result_bats)
+
 
 # takes keyboard input and returns the file selected and search string
 def decode_keys(code, selected, search, len_all_bats):
@@ -71,10 +74,11 @@ def decode_keys(code, selected, search, len_all_bats):
     return [selected, search]
 
 
-def display_bats(stdscr, all_bats, selected, search):
-    dims = stdscr.getmaxyx()
-    center_y = int(dims[0] / 2)
-    bats = [bat for bat in all_bats.copy() if search in bat.lower()]
+def display_bats(all_bats, selected, search):
+    height, width = stdscr.getmaxyx()
+    center_y = int(height / 2)
+    terms = search.split(' ')
+    bats = [bat for bat in all_bats.copy() if all(x in bat.lower() for x in terms)]
     stdscr.erase()
     stdscr.addstr(1, 1, "Select .bat File to Run", curses.A_BOLD | curses.A_UNDERLINE)
     if len(search) > 0:
@@ -82,13 +86,16 @@ def display_bats(stdscr, all_bats, selected, search):
     else:
         stdscr.addstr(1, 25, "(type to search)", curses.A_NORMAL)
     for x in range(0, len(bats)):
+
         value = x - selected + center_y
-        if 0 <= value < dims[0]:
+        if 2 <= value < height:
             if x == selected:
                 style = curses.A_STANDOUT
             else:
                 style = curses.A_NORMAL
-            stdscr.addstr(value, 0, bats[x].ljust(dims[1] - 1), style)
+            file_name = bats[x]
+            display_name = file_name[:width - 4] + '..' if len(file_name) > width - 2 else file_name
+            stdscr.addstr(value, 1, display_name, style)
     return bats
 
 
@@ -104,21 +111,21 @@ def exec_bat_file(bats, selected):
 
 def run_menu():
     while True:
-        with Screen() as stdscr:
-            stdscr.erase()
-            all_bats = get_bats()
-            bats = all_bats.copy()
-            selected = 0
-            search = ""
-            while search != 'X':
-                bats = display_bats(stdscr, all_bats, selected, search)
-                code = stdscr.getch()
-                [selected, search] = decode_keys(code, selected, search, len(all_bats))
-        # sums = get_sum()
-        # start = datetime.datetime.now()
-        exec_bat_file(bats, selected)
+        all_bats = get_bats()
+        bats = all_bats.copy()
+        selected = 0
+        search = ""
+        while search != 'X':
+            bats = display_bats(all_bats, selected, search)
+            code = stdscr.getch()
+            [selected, search] = decode_keys(code, selected, search, len(all_bats))
+    # sums = get_sum()
+    # start = datetime.datetime.now()
+    exec_bat_file(bats, selected)
         # update_stats(start, sums)
 
 
 if __name__ == "__main__":
-    run_menu()
+    with Screen() as stdscr:
+        stdscr.erase()
+        run_menu()

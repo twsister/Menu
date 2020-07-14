@@ -22,7 +22,6 @@ def process(ENV, contents):
             _translate(section.strip())
             continue
         lines = section.split('\n')
-        # print(lines)
         for line in lines:
             _translate(line.strip())
 
