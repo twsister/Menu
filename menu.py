@@ -110,22 +110,24 @@ def exec_bat_file(bats, selected):
 
 
 def run_menu():
+    global stdscr
     while True:
-        all_bats = get_bats()
-        bats = all_bats.copy()
-        selected = 0
-        search = ""
-        while search != 'X':
-            bats = display_bats(all_bats, selected, search)
-            code = stdscr.getch()
-            [selected, search] = decode_keys(code, selected, search, len(all_bats))
-    # sums = get_sum()
-    # start = datetime.datetime.now()
-    exec_bat_file(bats, selected)
+        with Screen() as stdscr:
+            stdscr.erase()
+            all_bats = get_bats()
+            bats = all_bats.copy()
+            selected = 0
+            search = ""
+            while search != 'X':
+                bats = display_bats(all_bats, selected, search)
+                code = stdscr.getch()
+                [selected, search] = decode_keys(code, selected, search, len(all_bats))
+        # sums = get_sum()
+        # start = datetime.datetime.now()
+        exec_bat_file(bats, selected)
         # update_stats(start, sums)
 
 
 if __name__ == "__main__":
-    with Screen() as stdscr:
-        stdscr.erase()
-        run_menu()
+    stdscr = None
+    run_menu()
