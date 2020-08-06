@@ -19,47 +19,47 @@ def test_get_bats(fs):
 
 # ensure '2)' displays before '10)'
 def test_display_bats_sorted():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test', '2) XSeg - edit', '10) XSeg - apply']
     selected = 0
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['1) test', '2) XSeg - edit', '10) XSeg - apply']
 
 
 # test searching a single word
 def test_display_bats_search_word():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test', '2) XSeg - edit', '10) XSeg - apply']
     selected = 0
     search = 'xs'
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['2) XSeg - edit', '10) XSeg - apply']
 
 
 # test searching for multiple words
 def test_display_bats_search_multiple_words():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test', '2) XSeg - edit', '10) XSeg - apply']
     selected = 0
     search = 'xs ed'
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['2) XSeg - edit']
 
 
 # ensure default display is correct
 def test_display_bats_text():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test', '2) XSeg - edit', '10) XSeg - apply']
     selected = 0
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['1) test', '2) XSeg - edit', '10) XSeg - apply']
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 8
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -71,14 +71,14 @@ def test_display_bats_text():
 
 # ensure files move up and are correctly highlighted when selected changes
 def test_display_bats_down_one():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test', '2) XSeg - edit', '10) XSeg - apply']
     selected = 1
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['1) test', '2) XSeg - edit', '10) XSeg - apply']
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 8
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -90,14 +90,14 @@ def test_display_bats_down_one():
 
 # ensure long file names are ok
 def test_display_bats_long_names():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 80]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 80]
     all_bats = ['1) test of a really really really long file name', '2) XSeg - edit', '10) XSeg - apply']
     selected = 1
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['1) test of a really really really long file name', '2) XSeg - edit', '10) XSeg - apply']
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 8
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -109,14 +109,14 @@ def test_display_bats_long_names():
 
 # ensure long file names are truncated if screen is too small
 def test_display_bats_truncated_long_names():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [40, 30]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [40, 30]
     all_bats = ['1) test of a really really really long file name', '2) XSeg - edit', '10) XSeg - apply']
     selected = 1
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['1) test of a really really really long file name', '2) XSeg - edit', '10) XSeg - apply']
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 8
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -128,8 +128,8 @@ def test_display_bats_truncated_long_names():
 
 # fix known curses error when printing to last character of bottom row
 def test_display_bats_curses_error():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [20, 46]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [20, 46]
     all_bats = [
         '1) test of a really really really long file name',
         '2) XSeg - edit',
@@ -145,9 +145,9 @@ def test_display_bats_curses_error():
     ]
     selected = 0
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == all_bats
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 15
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -166,8 +166,8 @@ def test_display_bats_curses_error():
 
 # ensure top line is not over written
 def test_display_bats_top_line_bug():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [20, 40]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [20, 40]
     all_bats = [
         '1) test of a really really really long file name',
         '2) XSeg - edit',
@@ -198,9 +198,9 @@ def test_display_bats_top_line_bug():
     ]
     selected = 10
     search = ''
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == all_bats
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 23
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"
@@ -227,8 +227,8 @@ def test_display_bats_top_line_bug():
 
 # ensure cursor doesn't go below the bottom of the list of bats
 def test_display_bats_cursor_disappears_bug():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [20, 40]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [20, 40]
     all_bats = [
         '1) test',
         '2) test',
@@ -239,16 +239,16 @@ def test_display_bats_cursor_disappears_bug():
     curses.initscr()
     selected = 0
     search = '4'
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['4) test']
     code = curses.KEY_DOWN
     search = '4'
     [selected, search] = menu.decode_keys(code, selected, search, len(bats))
     assert search == '4'
     assert selected == 0
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == ['4) test']
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 11
     assert result[10] == "addstr(10, 1, '4) test', 65536)]"
@@ -256,8 +256,8 @@ def test_display_bats_cursor_disappears_bug():
 
 # ensure searching for garbage results in the empty set of files
 def test_display_bats_nothing_found():
-    menu.stdscr = Mock()
-    menu.stdscr.getmaxyx.return_value = [20, 40]
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [20, 40]
     all_bats = [
         '1) test',
         '2) test',
@@ -268,9 +268,9 @@ def test_display_bats_nothing_found():
     curses.initscr()
     selected = 0
     search = 'q'
-    bats = menu.display_bats(all_bats, selected, search)
+    bats = menu.display_bats(all_bats, selected, search, stdscr)
     assert bats == []
-    result = str(menu.stdscr.method_calls).split('call.')
+    result = str(stdscr.method_calls).split('call.')
     result = list(map(str.strip, result))
     assert len(result) == 5
     assert result[3] == "addstr(1, 1, 'Select .bat File to Run', 2228224),"

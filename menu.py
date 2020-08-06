@@ -74,7 +74,7 @@ def decode_keys(code, selected, search, len_bats):
     return [selected, search]
 
 
-def display_bats(all_bats, selected, search):
+def display_bats(all_bats, selected, search, stdscr):
     height, width = stdscr.getmaxyx()
     center_y = int(height / 2)
     terms = search.split(' ')
@@ -110,7 +110,7 @@ def exec_bat_file(bats, selected):
 
 
 def run_menu():
-    global stdscr
+    # global stdscr
     while True:
         with Screen() as stdscr:
             stdscr.erase()
@@ -119,7 +119,7 @@ def run_menu():
             selected = 0
             search = ""
             while search != 'X':
-                bats = display_bats(all_bats, selected, search)
+                bats = display_bats(all_bats, selected, search, stdscr)
                 code = stdscr.getch()
                 [selected, search] = decode_keys(code, selected, search, len(bats))
         # sums = get_sum()
@@ -129,5 +129,5 @@ def run_menu():
 
 
 if __name__ == "__main__":
-    stdscr = None
+    # stdscr = None
     run_menu()
