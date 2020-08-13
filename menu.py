@@ -2,10 +2,8 @@ import sys
 import os
 import natsort
 import curses
-import datetime
 import menu_runner
 from pathlib import Path
-# from BatchLogger import update_stats, log, get_sum
 from menu_logger import log
 
 # set dfl_root to location of .bat files
@@ -53,7 +51,7 @@ def get_bats():
 
 
 # takes keyboard input and returns the file selected and search string
-def decode_keys(code, selected, search, len_all_bats):
+def decode_keys(code, selected, search, len_bats):
     key = curses.keyname(code).decode()
     if code == 10 or code == 343:
         # ENTER - run the selected batch file
@@ -61,20 +59,22 @@ def decode_keys(code, selected, search, len_all_bats):
     elif code == 27:
         # ESC - exit the menu
         raise SystemExit
-    elif code == curses.KEY_DOWN and selected < len_all_bats - 1:
+    elif code == curses.KEY_DOWN and selected < len_bats - 1:
         selected += 1
     elif code == curses.KEY_UP and selected > 0:
         selected -= 1
     elif key.lower() in "abcdefghijklmnopqrstuvwxyz.-()_ 1234567890":
+        # searching, so reposition the cursor
         search += key.lower()
         selected = 0
     elif key == "^?" or key == "KEY_BACKSPACE":
+        # searching, so reposition the cursor
         search = search[:-1]
         selected = 0
     return [selected, search]
 
 
-def display_bats(all_bats, selected, search):
+def display_bats(all_bats, selected, search, stdscr):
     height, width = stdscr.getmaxyx()
     center_y = int(height / 2)
     terms = search.split(' ')
@@ -110,7 +110,7 @@ def exec_bat_file(bats, selected):
 
 
 def run_menu():
-    global stdscr
+    # global stdscr
     while True:
         with Screen() as stdscr:
             stdscr.erase()
@@ -119,9 +119,9 @@ def run_menu():
             selected = 0
             search = ""
             while search != 'X':
-                bats = display_bats(all_bats, selected, search)
+                bats = display_bats(all_bats, selected, search, stdscr)
                 code = stdscr.getch()
-                [selected, search] = decode_keys(code, selected, search, len(all_bats))
+                [selected, search] = decode_keys(code, selected, search, len(bats))
         # sums = get_sum()
         # start = datetime.datetime.now()
         exec_bat_file(bats, selected)
@@ -129,5 +129,5 @@ def run_menu():
 
 
 if __name__ == "__main__":
-    stdscr = None
+    # stdscr = None
     run_menu()
