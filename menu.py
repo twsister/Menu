@@ -111,6 +111,7 @@ def exec_bat_file(bats, selected):
 
 
 def get_selected_file(all_bats, selected, search, stdscr):
+    bats = all_bats
     while len(search) == 0 or search[0] != 'X':
         bats = display_bats(all_bats, selected, search, stdscr)
         code = stdscr.getch()
@@ -126,7 +127,6 @@ def run_menu():
         with Screen() as stdscr:
             stdscr.erase()
             all_bats = get_bats()
-            bats = all_bats.copy()
             [selected, search, bats] = get_selected_file(all_bats, selected, search, stdscr)
         # sums = get_sum()
         # start = datetime.datetime.now()
