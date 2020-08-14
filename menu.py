@@ -120,7 +120,7 @@ def run_menu():
             while search != 'X':
                 bats = display_bats(all_bats, selected, search, stdscr)
                 code = stdscr.getch()
-                [selected, search] = decode_keys(code, selected, search, len(bats))
+                [selected, search] = read_and_display(all_bats, selected, search, stdscr)
         # sums = get_sum()
         # start = datetime.datetime.now()
         exec_bat_file(bats, selected)
