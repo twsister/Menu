@@ -277,6 +277,8 @@ def test_display_bats_nothing_found():
     assert result[4] == "addstr(1, 25, 'q', 0)]"
 
 
+# pressing enter exits the menu
+# send X + search string back (to keep search string)
 def test_decode_keys_enter():
     curses.initscr()
     selected = 3
@@ -286,12 +288,14 @@ def test_decode_keys_enter():
     [selected, search] = menu.decode_keys(code, selected, search, len_all_bats)
     assert selected == 3
     assert search == 'X'
+    search = 'test'
     code = 343
     [selected, search] = menu.decode_keys(code, selected, search, len_all_bats)
     assert selected == 3
-    assert search == 'X'
+    assert search == 'Xtest'
 
 
+# ESC key is the same as CTRL+C
 def test_decode_keys_esc():
     curses.initscr()
     selected = 3
@@ -302,6 +306,7 @@ def test_decode_keys_esc():
         menu.decode_keys(code, selected, search, len_all_bats)
 
 
+# down arrow should move down, but not below bottom
 def test_decode_keys_down():
     curses.initscr()
     selected = 3
@@ -317,6 +322,7 @@ def test_decode_keys_down():
     assert search == ''
 
 
+# up arrow should move up, but not off the top
 def test_decode_keys_up():
     curses.initscr()
     selected = 3
@@ -333,6 +339,7 @@ def test_decode_keys_up():
     assert search == ''
 
 
+# check that search strings are appended and all lower case
 def test_decode_keys_search():
     curses.initscr()
     selected = 3
@@ -349,6 +356,7 @@ def test_decode_keys_search():
     assert search == 'jg'
 
 
+# backspace should erase a character from search string
 def test_decode_keys_backspace():
     curses.initscr()
     selected = 3
@@ -363,3 +371,17 @@ def test_decode_keys_backspace():
     [selected, search] = menu.decode_keys(code, selected, search, len_all_bats)
     assert selected == 0
     assert search == 'j'
+
+
+def test_get_selected_file():
+    curses.initscr()
+    all_bats = ['11', '12', '23', '24']
+    selected = 0
+    search = ''
+    stdscr = Mock()
+    stdscr.getmaxyx.return_value = [20, 40]
+    stdscr.getch.side_effect = [ord('2'), curses.KEY_DOWN, 10]
+    [selected, search, bats] = menu.get_selected_file(all_bats, selected, search, stdscr)
+    assert selected == 1
+    assert search == '2'
+    assert bats == ['12', '23', '24']

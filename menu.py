@@ -55,7 +55,8 @@ def decode_keys(code, selected, search, len_bats):
     key = curses.keyname(code).decode()
     if code == 10 or code == 343:
         # ENTER - run the selected batch file
-        search = 'X'
+        # X in position 0 is a flag
+        search = 'X' + search
     elif code == 27:
         # ESC - exit the menu
         raise SystemExit
@@ -109,19 +110,24 @@ def exec_bat_file(bats, selected):
             log("KeyboardInterrupt")
 
 
+def get_selected_file(all_bats, selected, search, stdscr):
+    bats = all_bats
+    while len(search) == 0 or search[0] != 'X':
+        bats = display_bats(all_bats, selected, search, stdscr)
+        code = stdscr.getch()
+        [selected, search] = decode_keys(code, selected, search, len(bats))
+    search = search[1:]
+    return [selected, search, bats]
+
+
 def run_menu():
-    # global stdscr
+    selected = 0
+    search = ""
     while True:
         with Screen() as stdscr:
             stdscr.erase()
             all_bats = get_bats()
-            bats = all_bats.copy()
-            selected = 0
-            search = ""
-            while search != 'X':
-                bats = display_bats(all_bats, selected, search, stdscr)
-                code = stdscr.getch()
-                [selected, search] = decode_keys(code, selected, search, len(bats))
+            [selected, search, bats] = get_selected_file(all_bats, selected, search, stdscr)
         # sums = get_sum()
         # start = datetime.datetime.now()
         exec_bat_file(bats, selected)
@@ -129,5 +135,4 @@ def run_menu():
 
 
 if __name__ == "__main__":
-    # stdscr = None
     run_menu()
